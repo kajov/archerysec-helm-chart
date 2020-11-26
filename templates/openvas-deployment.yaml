@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: openvas
+  name: openvas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: openvas
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: openvas
+    spec:
+      containers:
+      - image: avhost/docker-openvas
+        imagePullPolicy: ""
+        name: openvas
+        ports:
+        - containerPort: 443
+        - containerPort: 9390
+        - containerPort: 9392
+        resources: {}
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}

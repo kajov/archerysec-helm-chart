@@ -1,0 +1,26 @@
+apiVersion: v1
+appVersion: "v1.9.1"
+description: A helm chart for Archerysec/Archery for kubernetes deployments
+name: archery-to-k8s
+ChartVersion: 0.0.1
+
+owner: ArcherySec
+maintainers:
+  - name: Karolis Jovaisas
+    email: kjovaisas@gmail.com
+sources:
+  - https://github.com/archerysec/archerysec
+keywords:
+  - security
+    testing
+    kubernetes
+    vulnerabilities
+    helm
+    pen-test
+    nmap
+    owasp
+    zap
+    openvas
+    greenbone
+
+license: "GPL-3.0"
