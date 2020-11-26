@@ -1,0 +1,64 @@
+# Hooks
+hooks:
+  # Enable or dissable hooks
+  enabled: true
+
+replicaCount: 1
+
+PodDisruptionBudget:
+  enable: false
+
+# Integrate vault mutating webhook to the chart
+vault:
+  enabled: false
+  security:
+    mutate_configmap: true
+    vault_addr: http://qc-vault.qc-iam.svc.cluster.local:8200
+    vault_role: archery
+    vault_path: kubernetes
+    vault_skip_verify: true
+
+# Arachni web crawler
+arachni:
+  # Enable or dissable arachni deployment
+  deploy:
+    enabled: true
+
+  # Arachni Service ports
+  service:
+    apiPort: 7331
+    httpPort: 9292
+
+  # Arachni Image repo
+  image: ahannigan/docker-arachni
+  tag: latest
+  imagePullPolicy: always
+  restartPolicy: always
+
+  # Arachni deployment resources minimum suggested req. mem=2GiB cpu=1
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 128Mi
+
+  # will services be created
+  services:
+    service: true
+
+  serviceType: ClusterIP
+
+postgres_db:
+  # Enable or dissable deployment for postgres_db
+  deployment:
+    enabled: true
+
+    image:
+    version:
+    imagePullPolicy:
+    restartPolicy:
+
+    env:
+      POSTRESS_DB_NAME: archerysec
