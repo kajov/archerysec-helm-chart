@@ -31,13 +31,13 @@ spec:
       containers:
         command: ["/bin/sh"]
         args: ["-c", "zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true"]
-          image: "{{ .Values.zaproxy.image }}:{{ .Values.zaproxy.tag }}"
-          imagePullPolicy: "{{ .Values.zaproxy.imagePullPolicy }}"
-          name: {{ template "zaproxy.name" . }}
-          ports:
-            - containerPort: {{ .Values.zaproxy.service.api_port }}
-          resources:
-            {{- toYaml .Values.zaproxy.resources | nindent 8 -}}
+        image: "{{ .Values.zaproxy.image }}:{{ .Values.zaproxy.tag }}"
+        imagePullPolicy: "{{ .Values.zaproxy.imagePullPolicy }}"
+        name: {{ template "zaproxy.name" . }}
+        ports:
+          - containerPort: {{ .Values.zaproxy.service.api_port }}
+        resources:
+          {{- toYaml .Values.zaproxy.resources | nindent 8 -}}
       restartPolicy: {{ .Values.zaproxy.restartPolicy }}
       serviceAccountName: {}
       volumes: {}

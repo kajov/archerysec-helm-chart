@@ -1,28 +1,28 @@
 # Hooks
 hooks:
-  # Enable or dissable hooks
+  # Enable or disable hooks
   enabled: false
 
 replicaCount: 1
 
-#TODO
+##TODO
 PodDisruptionBudget:
   enable: false
 
-# Integrate vault mutating webhook to the chart
+## Integrate vault mutating webhook to the chart
 ## TODO annotations have not been added to the template files for deployments yet
 vault:
   enabled: false
   security:
     mutate_configmap: true
-    vault_addr: http://qc-vault.qc-iam.svc.cluster.local:8200
+    vault_addr: http://vault.iam.svc.cluster.local:8200
     vault_role: archery
     vault_path: kubernetes
     vault_skip_verify: true
 
 # Arachni deployment
 arachni:
-  # Enable or dissable arachni deployment
+  # Enable or disable arachni deployment
   deployment:
     enabled: true
 
@@ -38,7 +38,7 @@ arachni:
   restartPolicy: Always
 
   # Arachni deployment resources minimum suggested req. mem=2GiB cpu=1
-  ## Limited resource will result in incrased operation times.
+  ## Limited resource will result in increased operation times.
   resources:
     limits:
       cpu: 1
@@ -62,7 +62,7 @@ arachni:
     runAsNonRoot: false
 
 postgres_db:
-  # Enable or dissable deployment for postgres_db
+  # Enable or disable deployment for postgres_db
   deployment:
     enabled: true
 
@@ -84,16 +84,15 @@ postgres_db:
       DB_USER:
       DB_NAME:
       DB_HOST:
-      DJANGO_SETTINGS_MODULE:
-        { { .Values.archerysec.env.DJANGO_SETTINGS_MODULE } }
+      DJANGO_SETTINGS_MODULE: {{ .Values.archerysec.env.DJANGO_SETTINGS_MODULE }}
 
       #Vault integration for secret-key-injection
       DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
       DJANGO_DEBUG: 1
       EMAIL_HOST: mailhog
-      EMAIL_PORT: { { .Values.mailhog.service.port.smtp } }
+      EMAIL_PORT: {{ .Values.mailhog.service.port.smtp }}
 
-  # Creates Persistant volume claim, if dissabled - each restart will wipe the data.
+  # Creates Persistent volume claim, if disabled - each restart will wipe the data.
   # it is necessary that production has persistence enabled.
   persistence:
     enabled: true
@@ -108,7 +107,7 @@ openvas:
   images: avhost/docker-openvas
   tag: latest
   restartPolicy: Always
-  pullPolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
 
   ports:
     https_web: 443
@@ -122,6 +121,13 @@ openvas:
     requests:
       cpu: 1
       memory: 215Mi
+
+  securityContext:
+    enabled: true
+    runAsPrivileged: true
+    runAsUser: 1000
+    fsGrup: 1000
+    runAsRoot: false
 
 # Mailhog Deployment
 mailhog:
@@ -208,7 +214,7 @@ archerysec:
   deployment:
     enabled: true
 
-  # Might need docker re-buld to include NMAP_vulners
+  # Might need docker rebuild to include NMAP_vulners
   # Source - https://github.com/vulnersCom/nmap-vulners
   # Howto - https://github.com/archerysec/archerysec#nmap-vulners
   image: archerysec/archerysec
@@ -239,7 +245,7 @@ archerysec:
     DJANGO_DEBUG: "1"
     DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
     EMAIL_HOST: mailhog
-    EMAIL_PORT: { { .Values.mailhog.service.port.smtp } }
+    EMAIL_PORT: {{ .Values.mailhog.service.port.smtp }}
 
 # OWASP ZAP deployment
 zaproxy:

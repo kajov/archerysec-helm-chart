@@ -2,42 +2,48 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+  name: {{ include "openvas.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "arachni.name" . }}
-    helm.sh/chart: {{ include "arachni.chart" . }}
+    app.kubernetes.io/name: {{ include "openvas.name" . }}
+    helm.sh/chart: {{ include "openvas.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      io.kompose.service: openvas
-  strategy: {}
+      app.kubernetes.io/name: {{ include "openvas.name" }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
+      {{- with .Values.openvas.podAnnotations }}
+      annotation:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        io.kompose.service: openvas
+        app.kubernetes.io/name: {{ include "openvas.name" }}
+        app,kubernetes.io/instance: {{ .Release.Name }}
+      {{- with .Values.openvas.podLabels }}
+        {{- toYaml . | nindent  8 }}
+      {{- end }}
     spec:
+      {{- with .Values.openvas.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
       containers:
       - image: avhost/docker-openvas
-        imagePullPolicy: ""
-        name: openvas
+        imagePullPolicy: {{ .Values.openvas.imagePullPolicy }}
+        name: {{ template "openvas.name" . }}
         ports:
-        - containerPort: 443
-        - containerPort: 9390
-        - containerPort: 9392
-        resources: {}
-      restartPolicy: Always
-      serviceAccountName: ""
-      volumes: null
+        - containerPort: {{ .Values.openvas.ports.https_web }}
+        - containerPort: {{ .Values.openvas.ports.api_1 }}
+        - containerPort: {{ .Values.openvas.ports.api_2 }}
+        resources:
+          {{- toYaml .Values.openvas.resources | nindent 10 }}
+      restartPolicy: {{ .Values.openvas.restartPolicy }}
+      serviceAccountName: {}
+      volumes: {}
 status: {}
 {{- end -}}

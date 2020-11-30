@@ -35,16 +35,16 @@ spec:
         {{- end }}
       {{- end }}
       containers:
-        - args:
-            - bin/arachni_rest_server --address 0.0.0.0
-          image: "{{ .Values.arachni.image }}:{{ .Values.arachni.tag }}"
-          imagePullPolicy: "{{ .Values.arachni.pullPolicy}}"
-          name: {{ template "arachni.name" . }}
-          ports: 
-            - containerPort: {{ .Values.arachni.service.httpPort }}
-            - containerPort: {{ .Values.arachni.service.apiPort }}
-          resources:
-            {{- toYaml .Values.arachni.resources | nindent 6}}
+        command: ["/bin/sh"]
+        args: ["-c", "bin/arachni_rest_server --address 0.0.0.0"]
+        image: "{{ .Values.arachni.image }}:{{ .Values.arachni.tag }}"
+        imagePullPolicy: "{{ .Values.arachni.pullPolicy}}"
+        name: {{ template "arachni.name" . }}
+        ports: 
+          - containerPort: {{ .Values.arachni.service.httpPort }}
+          - containerPort: {{ .Values.arachni.service.apiPort }}
+        resources:
+          {{- toYaml .Values.arachni.resources | nindent 10 }}
       restartPolicy: {{ .Values.arachni.restartPolicy }}
       serviceAccountName: {}
       volumes: {}
