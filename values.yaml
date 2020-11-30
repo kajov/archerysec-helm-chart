@@ -1,0 +1,304 @@
+# Hooks
+hooks:
+  # Enable or disable hooks
+  enabled: false
+
+replicaCount: 1
+
+##TODO
+PodDisruptionBudget:
+  enable: false
+
+## Integrate vault mutating webhook to the chart
+## TODO annotations have not been added to the template files for deployments yet
+vault:
+  enabled: false
+  security:
+    mutate_configmap: true
+    vault_addr: http://vault.iam.svc.cluster.local:8200
+    vault_role: archery
+    vault_path: kubernetes
+    vault_skip_verify: true
+
+# Arachni deployment
+arachni:
+  # Enable or disable arachni deployment
+  deployment:
+    enabled: true
+
+  # Arachni Service ports
+  service:
+    apiPort: 7331
+    httpPort: 9292
+
+  # Arachni Image repo
+  image: ahannigan/docker-arachni
+  tag: 1.5.1-0.5.12
+  imagePullPolicy: Always
+  restartPolicy: Always
+
+  # Arachni deployment resources minimum suggested req. mem=2GiB cpu=1
+  ## Limited resource will result in increased operation times.
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 128Mi
+
+  # will services be created
+  services:
+    service: true
+
+  serviceType: ClusterIP
+
+  # Arachni securityContext
+  securityContext:
+    privileged: true
+    runAsUser: 1000
+    fsGroup: 1000
+    runAsNonRoot: false
+
+postgres_db:
+  # Enable or disable deployment for postgres_db
+  deployment:
+    enabled: true
+
+    image: postgress
+    # version bumb from 10.5-alpine
+    tag: 10.15-alpine
+    imagePullPolicy: IfNotPresent
+    restartPolicy: Always
+    resources:
+      limit:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 1
+        memory: 126Mi
+
+    env:
+      PDB_PASSWORD:
+      DB_USER:
+      DB_NAME:
+      DB_HOST:
+      DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
+
+      #Vault integration for secret-key-injection
+      DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
+      DJANGO_DEBUG: 1
+      EMAIL_HOST: mailhog
+      EMAIL_PORT: 1025
+
+  # Creates Persistent volume claim, if disabled - each restart will wipe the data.
+  # it is necessary that production has persistence enabled.
+  persistence:
+    enabled: true
+
+  mountPath: []
+
+# OpenVas deployment
+openvas:
+  deployment:
+    enabled: false
+
+  images: avhost/docker-openvas
+  tag: latest
+  restartPolicy: Always
+  imagePullPolicy: IfNotPresent
+
+  ports:
+    https_web: 443
+    api_1: 9390
+    api_2: 9392
+
+  resorces:
+    limit:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 215Mi
+
+  securityContext:
+    runAsPrivileged: true
+    runAsUser: 1000
+    fsGrup: 1000
+    runAsRoot: false
+
+  podLabels: {}
+  podAnnotations: {}
+  
+  securityContext:
+    runAsRoot: false
+    privileged: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+
+# Mailhog Deployment
+mailhog:
+  # Enabled mailhog deployment
+  deployment:
+    enabled: false
+
+  image:
+    repository: mailhog/mailhog
+    tag: 1.0.1
+    pullPolicy: IfNotPresent
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    annotations: {}
+    clusterIP: ""
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    type: ClusterIP
+    port:
+      http: 8025
+      smtp: 1025
+    nodePort:
+      http: ""
+      smtp: ""
+
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
+
+  ingress:
+    enabled: false
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: mailhog.example.com
+        paths: ["/"]
+
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  auth:
+    enabled: false
+    existingSecret: ""
+    fileName: auth.txt
+    fileContents: ""
+
+  podAnnotations: {}
+
+  podLabels: {}
+
+  extraEnv: []
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  affinity: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+#ArcherySec deployment
+archerysec:
+  # Enable chart deployment
+  deployment:
+    enabled: true
+
+  # Might need docker rebuild to include NMAP_vulners
+  # Source - https://github.com/vulnersCom/nmap-vulners
+  # Howto - https://github.com/archerysec/archerysec#nmap-vulners
+  image: archerysec/archerysec
+  tag: "v1.9.2"
+  pullPolicy: Always
+  restartPolicy: Always
+
+  # Deployment resources
+  resources:
+    limit:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 256Mi
+
+  service:
+    ports:
+      web: 8000
+
+  env:
+    #need to implement vault here
+    DB_HOST_NAME: db
+    DB_NAME: archerysec
+    DB_PASSWORD: archerysec
+    DJANGO_SECRET_KEY: '"SETME"'
+    # value 1 for full debug info in cli, 0 - quite mode no debug info in cli
+    DJANGO_DEBUG: "1"
+    DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
+    EMAIL_HOST: mailhog
+    EMAIL_PORT: 1025
+
+# OWASP ZAP deployment
+zaproxy:
+  deployment:
+    enabled: true
+
+  #owasp zap image repository
+  image: owasp/zap2docker-stable
+  tag: 2.9.0
+  restartPolicy: Always
+  pullPolicy: Always
+
+  resources:
+    limit:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 256Mi
+
+  args:
+    dev-insecure: true
+    production: false
+
+  service:
+    api_port: 8090
+    annotations: {}
+
+  podLabels: {}
+  podAnnotations: {}
+
+### appData ###
+identifier:
+  clusterId: autogenerated
+  tenantId: autogenerated
+  tenantName: autogenerated
+  spaceId: autogenerated
+  spaceName: autogenerated
+  appid: autogenerated
+  appName: archerysec
+
+### create cluster role binding
+## **TODO NOT LINKED YET TO THE TEMPLATE**
+rbac:
+  create: true
+
+serviceAccount:
+  enabled: false

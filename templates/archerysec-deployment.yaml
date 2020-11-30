@@ -1,13 +1,6 @@
+{{- if .Values.archerysec.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
-metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: archerysec
-  name: archerysec
 spec:
   replicas: 1
   selector:
@@ -15,41 +8,35 @@ spec:
       io.kompose.service: archerysec
   strategy: {}
   template:
-    metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
-      labels:
-        io.kompose.service: archerysec
     spec:
       containers:
-      - env:
-        - name: DB_HOST
-          value: db
-        - name: DB_NAME
-          value: archerysec
-        - name: DB_PASSWORD
-          value: archerysec
-        - name: DB_USER
-          value: archerysec
-        - name: DJANGO_DEBUG
-          value: "1"
-        - name: DJANGO_SECRET_KEY
-          value: '"SETME"'
-        - name: DJANGO_SETTINGS_MODULE
-          value: archerysecurity.settings.development
-        - name: EMAIL_HOST
-          value: mailhog
-        - name: EMAIL_PORT
-          value: "1025"
-        image: archerysec/archerysec
-        imagePullPolicy: ""
-        name: archerysec
-        ports:
-        - containerPort: 8000
-        resources: {}
+        - env:
+            - name: DB_HOST
+              value: db
+            - name: DB_NAME
+              value: archerysec
+            - name: DB_PASSWORD
+              value: archerysec
+            - name: DB_USER
+              value: archerysec
+            - name: DJANGO_DEBUG
+              value: "1"
+            - name: DJANGO_SECRET_KEY
+              value: '"SETME"'
+            - name: DJANGO_SETTINGS_MODULE
+              value: archerysecurity.settings.development
+            - name: EMAIL_HOST
+              value: mailhog
+            - name: EMAIL_PORT
+              value: "1025"
+          image: archerysec/archerysec
+          imagePullPolicy: ""
+          name: archerysec
+          ports:
+            - containerPort: 8000
+          resources: {}
       restartPolicy: Always
       serviceAccountName: ""
       volumes: null
 status: {}
+{{- end -}}

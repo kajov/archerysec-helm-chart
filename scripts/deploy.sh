@@ -2,6 +2,8 @@
 . ./data.sh
 echo $HELM_RELEASE_NAME
 
+## deployment script for Helm v2
+
 helm install --name $HELM_RELEASE_NAME \
 --namespace $KUBE_NAMESPACE $HELM_CHART_PATH \
 -f $HELM_VALUES_PATH \

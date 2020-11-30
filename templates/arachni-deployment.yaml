@@ -1,41 +1,50 @@
+{{- if .Values.arachni.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+  name: {{ include "arachni.fullname" . }}
   labels:
-    io.kompose.service: arachni
-  name: arachni
+    app.kubernetes.io/name: {{ include "arachni.name" . }}
+    helm.sh/chart: {{ include "arachni.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: arachni
-  strategy: {}
+      app.kubernetes.io/name: {{ include "arachni.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
+      {{- with .Values.arachni.podAnnotations }}
       annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
+        {{ toYaml . | indent 8 }}
+      {{- end }}
       labels:
-        io.kompose.service: arachni
+        app.kubernetes.io/name: {{ include "arachni.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      {{ with .Values.arachni.podlabels }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      {{- with .Values.arachni.securityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-      - args:
-        - bin/arachni_rest_server
-        - --address
-        - 0.0.0.0
-        image: ahannigan/docker-arachni
-        imagePullPolicy: ""
-        name: arachniscanner
-        ports:
-        - containerPort: 9292
-        - containerPort: 7331
-        resources: {}
-      restartPolicy: Always
-      serviceAccountName: ""
-      volumes: null
+        command: ["/bin/sh"]
+        args: ["-c", "bin/arachni_rest_server --address 0.0.0.0"]
+        image: "{{ .Values.arachni.image }}:{{ .Values.arachni.tag }}"
+        imagePullPolicy: "{{ .Values.arachni.pullPolicy}}"
+        name: {{ template "arachni.name" . }}
+        ports: 
+          - containerPort: {{ .Values.arachni.service.httpPort }}
+          - containerPort: {{ .Values.arachni.service.apiPort }}
+        resources:
+          {{- toYaml .Values.arachni.resources | nindent 10 }}
+      restartPolicy: {{ .Values.arachni.restartPolicy }}
+      serviceAccountName: {}
+      volumes: {}
 status: {}
+{{- end -}}

@@ -1,19 +1,23 @@
+{{- if .Values.zaproxy.deployment.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
   labels:
-    io.kompose.service: zaproxy
-  name: zaproxy
+    app.kubernetes.io/name: {{ include "zaproxy.name" $ | indent 4 }}-service
+    helm.sh/chart: {{ include "arachni.chart" $ | indent 4 }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namepsace }}
+  name: {{ include "zaproxy.fullname" . }}
 spec:
   ports:
-  - name: "8090"
-    port: 8090
-    targetPort: 8090
+  - name: "{{ .Values.zaproxy.service.api_port }}"
+    port: {{ .Values.zaproxy.service.api_port }}
+    targetPort: {{ .Values.zaproxy.service.api_port }}
   selector:
-    io.kompose.service: zaproxy
+    mathLabels:
+      app.kubernetes.io/name: {{ include "zaproxy.name" $ | indent 6 }}-service
+      app.kubernetes.io/instance: {{ .Release.Name }}
 status:
   loadBalancer: {}
+{{- end -}}
