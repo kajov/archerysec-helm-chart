@@ -23,7 +23,7 @@ vault:
 # Arachni deployment
 arachni:
   # Enable or dissable arachni deployment
-  deploy:
+  deployment:
     enabled: true
 
   # Arachni Service ports
@@ -34,7 +34,7 @@ arachni:
   # Arachni Image repo
   image: ahannigan/docker-arachni
   tag: "1.5.1-0.5.12"
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   restartPolicy: Always
 
   # Arachni deployment resources minimum suggested req. mem=2GiB cpu=1
@@ -52,6 +52,14 @@ arachni:
     service: true
 
   serviceType: ClusterIP
+
+  # Arachni securityContext
+  securityContext:
+    enabled: true
+    privileged: true
+    runAsUser: 1000
+    fsGroup: 1000
+    runAsNonRoot: false
 
 postgres_db:
   # Enable or dissable deployment for postgres_db
@@ -72,15 +80,18 @@ postgres_db:
         memory: 126Mi
 
     env:
-      - PDB_PASSWORD=
-      - DB_USER=
-      - DB_NAME=
-      - DB_HOST=
-      - DJANGO_SETTINGS_MODULE=arhcerysecurity.settings.development
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-"uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"}
-      - DJANGO_DEBUG=0
-      - EMAIL_HOST=mailhog
-      - EMAIL_PORT={{ .Values.mailhog.service.port.smtp }}
+      PDB_PASSWORD:
+      DB_USER:
+      DB_NAME:
+      DB_HOST:
+      DJANGO_SETTINGS_MODULE:
+        { { .Values.archerysec.env.DJANGO_SETTINGS_MODULE } }
+
+      #Vault integration for secret-key-injection
+      DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
+      DJANGO_DEBUG: 1
+      EMAIL_HOST: mailhog
+      EMAIL_PORT: { { .Values.mailhog.service.port.smtp } }
 
   # Creates Persistant volume claim, if dissabled - each restart will wipe the data.
   # it is necessary that production has persistence enabled.
@@ -223,12 +234,40 @@ archerysec:
     DB_HOST_NAME: db
     DB_NAME: archerysec
     DB_PASSWORD: archerysec
+    DJANGO_SECRET_KEY: '"SETME"'
     # value 1 for full debug info in cli, 0 - quite mode no debug info in cli
     DJANGO_DEBUG: "1"
-    DJANGO_SECRET_KEY: '"SETME"'
     DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
     EMAIL_HOST: mailhog
-    EMAIL_PORT: { { .Values.mailhog.service.smtp } }
+    EMAIL_PORT: { { .Values.mailhog.service.port.smtp } }
+
+# OWASP ZAP deployment
+zaproxy:
+  deployment:
+    enabled: true
+
+  #owasp zap image repository
+  image: owasp/zap2docker-stable
+  tag: "2.9.0"
+  restartPolicy: Always
+  pullPolicy: Always
+
+  resources:
+    limit:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 1
+      memory: 256Mi
+
+  args:
+    dev-insecure: true
+    production: false
+
+  service:
+    api_port: 8090
+
+  podLabels: {}
 
 ### appData ###
 identifier:
