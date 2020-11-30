@@ -19,20 +19,18 @@ spec:
     metadata:
       {{- with .Values.arachni.podAnnotations }}
       annotations:
-        {{ - toYaml . | indent 8 }}
+        {{ toYaml . | indent 8 }}
       {{- end }}
       labels:
         app.kubernetes.io/name: {{ include "arachni.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{ - with .Values.arachni.podlabels }}
-        {{ - toYaml . | nindent 8 }}
+      {{ with .Values.arachni.podlabels }}
+        {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- if .Values.arachni.securityContext.enabled }}
-        {{- with .Values.arachni.securityContext }}
-        securityContext:
-          {{- toyaml . | nindent 8 }}
-        {{- end }}
+      {{- with .Values.arachni.securityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
       {{- end }}
       containers:
         command: ["/bin/sh"]

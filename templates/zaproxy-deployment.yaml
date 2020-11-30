@@ -19,13 +19,13 @@ spec:
     metadata:
       {{- with .Values.zaproxy.podAnnotations }}
       annotations:
-        {{ - toYaml . | indent 8 }}
+        {{ toYaml . | indent 8 }}
       {{- end }}
       labels:
         app.kubernetes.io/name: {{ include "zaproxy.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{ - with .Values.zaproxy.podlabels }}
-        {{ - toYaml . | nindent 8 }}
+      {{ with .Values.zaproxy.podlabels }}
+        {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
       containers:

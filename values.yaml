@@ -33,7 +33,7 @@ arachni:
 
   # Arachni Image repo
   image: ahannigan/docker-arachni
-  tag: "1.5.1-0.5.12"
+  tag: 1.5.1-0.5.12
   imagePullPolicy: Always
   restartPolicy: Always
 
@@ -55,7 +55,6 @@ arachni:
 
   # Arachni securityContext
   securityContext:
-    enabled: true
     privileged: true
     runAsUser: 1000
     fsGroup: 1000
@@ -68,7 +67,7 @@ postgres_db:
 
     image: postgress
     # version bumb from 10.5-alpine
-    tag: "10.15-alpine"
+    tag: 10.15-alpine
     imagePullPolicy: IfNotPresent
     restartPolicy: Always
     resources:
@@ -84,13 +83,13 @@ postgres_db:
       DB_USER:
       DB_NAME:
       DB_HOST:
-      DJANGO_SETTINGS_MODULE: {{ .Values.archerysec.env.DJANGO_SETTINGS_MODULE }}
+      DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
 
       #Vault integration for secret-key-injection
       DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
       DJANGO_DEBUG: 1
       EMAIL_HOST: mailhog
-      EMAIL_PORT: {{ .Values.mailhog.service.port.smtp }}
+      EMAIL_PORT: 1025
 
   # Creates Persistent volume claim, if disabled - each restart will wipe the data.
   # it is necessary that production has persistence enabled.
@@ -102,7 +101,7 @@ postgres_db:
 # OpenVas deployment
 openvas:
   deployment:
-    enabled: true
+    enabled: false
 
   images: avhost/docker-openvas
   tag: latest
@@ -123,11 +122,20 @@ openvas:
       memory: 215Mi
 
   securityContext:
-    enabled: true
     runAsPrivileged: true
     runAsUser: 1000
     fsGrup: 1000
     runAsRoot: false
+
+  podLabels: {}
+  podAnnotations: {}
+  
+  securityContext:
+    runAsRoot: false
+    privileged: true
+    runAsUser: 1000
+    fsGroup: 1000
+
 
 # Mailhog Deployment
 mailhog:
@@ -137,7 +145,7 @@ mailhog:
 
   image:
     repository: mailhog/mailhog
-    tag: ""
+    tag: 1.0.1
     pullPolicy: IfNotPresent
 
   nameOverride: ""
@@ -245,7 +253,7 @@ archerysec:
     DJANGO_DEBUG: "1"
     DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
     EMAIL_HOST: mailhog
-    EMAIL_PORT: {{ .Values.mailhog.service.port.smtp }}
+    EMAIL_PORT: 1025
 
 # OWASP ZAP deployment
 zaproxy:
@@ -254,7 +262,7 @@ zaproxy:
 
   #owasp zap image repository
   image: owasp/zap2docker-stable
-  tag: "2.9.0"
+  tag: 2.9.0
   restartPolicy: Always
   pullPolicy: Always
 
@@ -272,8 +280,10 @@ zaproxy:
 
   service:
     api_port: 8090
+    annotations: {}
 
   podLabels: {}
+  podAnnotations: {}
 
 ### appData ###
 identifier:
@@ -289,3 +299,6 @@ identifier:
 ## **TODO NOT LINKED YET TO THE TEMPLATE**
 rbac:
   create: true
+
+serviceAccount:
+  enabled: false
