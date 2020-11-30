@@ -1,3 +1,4 @@
+{{- if .Values.archerysec.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 spec:
@@ -38,3 +39,4 @@ spec:
       serviceAccountName: ""
       volumes: null
 status: {}
+{{- end -}}

@@ -1,3 +1,4 @@
+{{- if .Values.openvas.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,8 +7,11 @@ metadata:
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
-    io.kompose.service: openvas
-  name: openvas
+    app.kubernetes.io/name: {{ include "arachni.name" . }}
+    helm.sh/chart: {{ include "arachni.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -36,3 +40,4 @@ spec:
       serviceAccountName: ""
       volumes: null
 status: {}
+{{- end -}}
