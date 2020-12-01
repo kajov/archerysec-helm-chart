@@ -1,0 +1,31 @@
+{{- if .Values.postgresdb.replication.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "postgresdb.fullname" . }}-read
+  labels:
+    app: {{ template "postgresdb.name" . }}
+    chart: {{ template "postgresdb.chart" . }}
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+{{- with .Values.postgresdb.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.postgresdb.service.type }}
+  {{- if and .Values.postgresdb.service.loadBalancerIP (eq .Values.postgresdb.service.type "LoadBalancer") }}
+  loadBalancerIP: {{ .Values.postgresdb.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: tcp-postgresql
+      port:  {{ template "postgresdb.port" . }}
+      targetPort: tcp-postgresql
+      {{- if .Values.postgresdb.service.nodePort }}
+      nodePort: {{ .Values.postgresdb.service.nodePort }}
+      {{- end }}
+  selector:
+    app: {{ template "postgresdb.name" . }}
+    release: {{ .Release.Name | quote }}
+    role: slave
+{{- end }}

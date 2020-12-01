@@ -14,7 +14,3 @@ helm install --name $HELM_RELEASE_NAME \
 --set identifier.spaceId=${SPACE_ID} \
 --set identifier.spaceName=${SPACE_NAME} \
 --debug --no-hooks
-
-echo $HELM_RELEASE_NAME " ready & executing"
-echo "Sleeping for 2 Minutes"
-sleep 2m

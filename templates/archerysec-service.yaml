@@ -2,20 +2,25 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ include "archerysec.name" . }}-service
+  {{- with .Values.mailhog.service.annotations }}
   annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
-    io.kompose.service: archerysec
-  name: archerysec
+    app.kubernetes.io/name: {{ include "archerysec.name" . }}-service
+    helm.sh/chart: {{ include "archerysec.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - name: "8000"
-    port: 8000
-    targetPort: 8000
+    port: {{ .Values.archerysec.service.ports.web }}
+    protocol: TCP
   selector:
-    io.kompose.service: archerysec
+    app: {{ template "archerysec.name" . }}
+    release: {{ .Release.Name | quote }}
 status:
   loadBalancer: {}
 {{- end -}}

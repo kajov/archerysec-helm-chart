@@ -15,9 +15,6 @@ spec:
     port: {{ .Values.zaproxy.service.api_port }}
     targetPort: {{ .Values.zaproxy.service.api_port }}
   selector:
-    mathLabels:
-      app.kubernetes.io/name: {{ include "zaproxy.name" $ | indent 6 }}-service
-      app.kubernetes.io/instance: {{ .Release.Name }}
 status:
   loadBalancer: {}
 {{- end -}}

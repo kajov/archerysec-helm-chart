@@ -24,7 +24,7 @@ vault:
 arachni:
   # Enable or disable arachni deployment
   deployment:
-    enabled: true
+    enabled: false
 
   # Arachni Service ports
   service:
@@ -60,16 +60,20 @@ arachni:
     fsGroup: 1000
     runAsNonRoot: false
 
-postgres_db:
+postgresdb:
   # Enable or disable deployment for postgres_db
   deployment:
     enabled: true
-
+  
+  replication:
+    enabled: false
+  
     image: postgress
     # version bumb from 10.5-alpine
-    tag: 10.15-alpine
+    tag: "10.15-alpine"
     imagePullPolicy: IfNotPresent
     restartPolicy: Always
+    
     resources:
       limit:
         cpu: 1
@@ -79,11 +83,12 @@ postgres_db:
         memory: 126Mi
 
     env:
-      PDB_PASSWORD:
-      DB_USER:
-      DB_NAME:
-      DB_HOST:
+      DB_PASSWORD: archerysec
+      DB_USER: archerysec
+      DB_NAME: archerysec
+      DB_HOST: db
       DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
+
 
       #Vault integration for secret-key-injection
       DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
@@ -93,11 +98,27 @@ postgres_db:
 
   # Creates Persistent volume claim, if disabled - each restart will wipe the data.
   # it is necessary that production has persistence enabled.
+  ###TODO
   persistence:
     enabled: true
 
   mountPath: []
 
+  podLabels: {}
+  podAnnotations: {}
+
+  service:
+    type: ClusterIP
+    port: 5432
+    
+    # nodePort: 
+    
+    ## Reference original postgress helm chart to fill annotations information
+    annotations: {}
+    
+  global:
+    postgresql: {}
+    
 # OpenVas deployment
 openvas:
   deployment:
@@ -218,16 +239,18 @@ mailhog:
 
 #ArcherySec deployment
 archerysec:
-  # Enable chart deployment
+  # Enable Archerysec deployment
   deployment:
     enabled: true
+    worker:
+      enabled: false
 
   # Might need docker rebuild to include NMAP_vulners
   # Source - https://github.com/vulnersCom/nmap-vulners
   # Howto - https://github.com/archerysec/archerysec#nmap-vulners
   image: archerysec/archerysec
-  tag: "v1.9.2"
-  pullPolicy: Always
+  tag: latest
+  pullPolicy: ifNotPresent
   restartPolicy: Always
 
   # Deployment resources
@@ -243,22 +266,33 @@ archerysec:
     ports:
       web: 8000
 
-  env:
-    #need to implement vault here
-    DB_HOST_NAME: db
-    DB_NAME: archerysec
-    DB_PASSWORD: archerysec
-    DJANGO_SECRET_KEY: '"SETME"'
-    # value 1 for full debug info in cli, 0 - quite mode no debug info in cli
-    DJANGO_DEBUG: "1"
-    DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
-    EMAIL_HOST: mailhog
-    EMAIL_PORT: 1025
+  annotations: {}
+
+  podAnnotations: {}
+
+  podLabels: {}
+
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+    privileged: true
+
+  # env:
+  #   #need to implement vault here
+  #   DB_HOST_NAME: db
+  #   DB_NAME: archerysec
+  #   DB_PASSWORD: archerysec
+  #   DJANGO_SECRET_KEY: '"SETME"'
+  #   # value 1 for full debug info in cli, 0 - quite mode no debug info in cli
+  #   DJANGO_DEBUG: "1"
+  #   DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
+  #   EMAIL_HOST: mailhog
+  #   EMAIL_PORT: 1025
 
 # OWASP ZAP deployment
 zaproxy:
   deployment:
-    enabled: true
+    enabled: false
 
   #owasp zap image repository
   image: owasp/zap2docker-stable

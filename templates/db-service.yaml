@@ -1,0 +1,40 @@
+{{- if .Values.postgresdb.deployment.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "postgresdb.name" . }}-db
+  labels:
+    app: {{ template "postgresdb.name" . }}-db
+    chart: {{ template "postgresdb.chart" . }}
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+{{- with .Values.postgresdb.service.annotations }}
+  annotations:
+{{ tpl (toYaml .) $ | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.postgresdb.service.type }}
+  {{- if and .Values.postgresdb.service.loadBalancerIP (eq .Values.postgresdb.service.type "LoadBalancer") }}
+  loadBalancerIP: {{ .Values.postgresdb.service.loadBalancerIP }}
+  {{- end }}
+  {{- if and (eq .Values.postgresdb.service.type "LoadBalancer") .Values.postgresdb.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{ with .Values.postgresdb.service.loadBalancerSourceRanges }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+  {{- end }}
+  {{- if and (eq .Values.postgresdb.service.type "ClusterIP") .Values.postgresdb.service.clusterIP }}
+  clusterIP: {{ .Values.postgresdb.service.clusterIP }}
+  {{- end }}
+  ports:
+    - name: tcp-postgresql
+      port: {{ template "postgresdb.port" . }}
+      targetPort: tcp-postgresql
+      {{- if .Values.postgresdb.service.nodePort }}
+      nodePort: {{ .Values.postgresdb.service.nodePort }}
+      {{- end }}
+  selector:
+    app: {{ template "postgresdb.name" . }}
+    release: {{ .Release.Name | quote }}
+    role: master
+{{- end -}}

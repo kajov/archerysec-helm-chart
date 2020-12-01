@@ -1,33 +1,46 @@
-{{- if .Values.archerysec.deployment.enabled -}}
+{{- if .Values.archerysec.deployment.worker.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "archerysec.name" . }}-worker
+  {{- with .Values.mailhog.service.annotations }}
   annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
-    io.kompose.service: archerysec-worker
-  name: archerysec-worker
+    app.kubernetes.io/name: {{ include "archerysec.name" . }}-worker
+    helm.sh/chart: {{ include "archerysec.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      io.kompose.service: archerysec-worker
-  strategy: {}
+      app.kubernetes.io/name: {{ include "archerysec.name" . }}-worker
+      helm.sh/chart: {{ include "archerysec.chart" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
   template:
     metadata:
+      {{- with .Values.archerysec.podAnnotations }}
       annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        io.kompose.service: archerysec-worker
+        app.kubernetes.io/name: {{ include "archerysec.name" . }}-worker
+        helm.sh/chart: {{ include "archerysec.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
+      {{- with .Values.archerysec.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - env:
         - name: ARCHERY_WORKER
-          value: "True"
+          value: "TRUE"
         - name: DB_HOST
           value: db
         - name: DB_NAME
@@ -39,19 +52,22 @@ spec:
         - name: DJANGO_DEBUG
           value: "1"
         - name: DJANGO_SECRET_KEY
-          value: '"SETME"'
+          value: '"uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"'
         - name: DJANGO_SETTINGS_MODULE
           value: archerysecurity.settings.development
         - name: EMAIL_HOST
           value: mailhog
         - name: EMAIL_PORT
           value: "1025"
-        image: archerysec/archerysec
-        imagePullPolicy: ""
-        name: archerysec-worker
-        resources: {}
-      restartPolicy: Always
-      serviceAccountName: ""
-      volumes: null
+        image: "{{ .Values.archerysec.image }}:{{ .Values.archerysec.tag }}"
+        imagePullPolicy: "{{ .Values.archerysec.imagePullPolicy }}"
+        name: {{ template "archerysec.name" . }}-worker
+        ports:
+        - containerPort: {{ .Values.archerysec.service.ports.web }}
+        resources:
+          {{- toYaml .Values.archerysec.resources | nindent 10 }}
+      restartPolicy: {{ .Values.archerysec.restartPolicy }}
+      # serviceAccountName: {}
+      # volumes: {}
 status: {}
 {{- end -}}

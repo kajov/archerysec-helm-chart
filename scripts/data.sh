@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export APP_NAME="archerysec"
-export APP_ID="achqua78o7r6otrac"
+export APP_ID="helm-chart"
 export SPACE_NAME="threat"
 export SPACE_ID="management"
 export CLUSTER_ID="minikube"

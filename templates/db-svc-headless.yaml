@@ -1,0 +1,21 @@
+{{- if .Values.postgresdb.deployment.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "postgresdb.fullname" . }}-headless
+  labels:
+    app: {{ template "postgresdb.name" . }}
+    chart: {{ template "postgresdb.chart" . }}
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: tcp-postgresql
+      port: {{ template "postgresdb.port" . }}
+      targetPort: tcp-postgresql
+  selector:
+    app: {{ template "postgresdb.name" . }}
+    release: {{ .Release.Name | quote }}
+{{- end -}}

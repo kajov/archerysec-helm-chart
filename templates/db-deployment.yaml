@@ -1,20 +1,35 @@
-{{- if .Values.postgres_db.deployment.enabled -}}
+{{- if .Values.postgresdb.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "postgresdb.fullname" . }}-db
+  {{- with .Values.mailhog.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
-  name: db
+    app.kubernetes.io/name: {{ include "postgresdb.name" . }}-db
+    helm.sh/chart: {{ include "postgresdb.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      io.kompose.service: db
+      app.kubernetes.io/name: {{ include "postgresdb.name" . }}-db
+      helm.sh/chart: {{ include "postgresdb.chart" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        io.kompose.service: db
+        app.kubernetes.io/name: {{ include "postgresdb.name" . }}-db
+        helm.sh/chart: {{ include "postgresdb.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
       containers:
         - env:
@@ -24,15 +39,16 @@ spec:
               value: archerysec
             - name: POSTGRES_USER
               value: archerysec
-          image: postgres:10.1-alpine
-          imagePullPolicy: ""
-          name: db
-          resources: {}
+          image: "{{ .Values.postgresdb.image }}:{{ .Values.postgresdb.tag}}"
+          imagePullPolicy: "{{ .Values.postgresdb.imagePullPolicy}}"
+          name: {{ template  "postgresdb.name" . }}-db
+          resources:
+            {{- toYaml .Values.postgresdb.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: db-claim0
       restartPolicy: Always
-      serviceAccountName: ""
+      # serviceAccountName: ""
       volumes:
         - name: db-claim0
           persistentVolumeClaim:

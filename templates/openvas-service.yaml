@@ -2,26 +2,25 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+  name: {{ include "openvas.fullname" . }}
   labels:
-    io.kompose.service: openvas
-  name: openvas
+    app.kubernetes.io/name: {{ include "openvas.name" . }}
+    helm.sh/chart: {{ include "openvas.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - name: "443"
-    port: 443
-    targetPort: 443
+    port: {{ .Values.openvas.ports.https_web }}
+    targetPort: {{ .Values.openvas.ports.https_web }}
   - name: "9390"
-    port: 9390
-    targetPort: 9390
+    port: {{ .Values.openvas.ports.api_1 }}
+    targetPort: {{ .Values.openvas.ports.api_1 }}
   - name: "9392"
-    port: 9392
-    targetPort: 9392
-  selector:
-    io.kompose.service: openvas
+    port: {{ .Values.openvas.ports.api_2 }}
+    targetPort: {{ .Values.openvas.ports.api_2 }}
+  selector: {}
 status:
   loadBalancer: {}
 {{- end -}}

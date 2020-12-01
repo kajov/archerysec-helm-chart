@@ -1,42 +1,72 @@
 {{- if .Values.archerysec.deployment.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
+metadata:
+  name: {{ include "archerysec.fullname" . }}
+  {{- with .Values.mailhog.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ include "archerysec.name" . }}
+    helm.sh/chart: {{ include "archerysec.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      io.kompose.service: archerysec
-  strategy: {}
+      app.kubernetes.io/name: {{ include "archerysec.name" . }}
+      helm.sh/chart: {{ include "archerysec.chart" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+
   template:
+    metadata:
+      {{- with .Values.archerysec.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "archerysec.name" . }}
+        helm.sh/chart: {{ include "archerysec.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
+      {{- with .Values.archerysec.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - env:
-            - name: DB_HOST
-              value: db
-            - name: DB_NAME
-              value: archerysec
-            - name: DB_PASSWORD
-              value: archerysec
-            - name: DB_USER
-              value: archerysec
-            - name: DJANGO_DEBUG
-              value: "1"
-            - name: DJANGO_SECRET_KEY
-              value: '"SETME"'
-            - name: DJANGO_SETTINGS_MODULE
-              value: archerysecurity.settings.development
-            - name: EMAIL_HOST
-              value: mailhog
-            - name: EMAIL_PORT
-              value: "1025"
-          image: archerysec/archerysec
-          imagePullPolicy: ""
-          name: archerysec
-          ports:
-            - containerPort: 8000
-          resources: {}
-      restartPolicy: Always
-      serviceAccountName: ""
-      volumes: null
+      - env:
+        - name: DB_HOST
+          value: db
+        - name: DB_NAME
+          value: archerysec
+        - name: DB_PASSWORD
+          value: archerysec
+        - name: DB_USER
+          value: archerysec
+        - name: DJANGO_DEBUG
+          value: "1"
+        - name: DJANGO_SECRET_KEY
+          value: '"uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"'
+        - name: DJANGO_SETTINGS_MODULE
+          value: archerysecurity.settings.development
+        - name: EMAIL_HOST
+          value: mailhog
+        - name: EMAIL_PORT
+          value: "1025"
+        image: "{{ .Values.archerysec.image }}:{{ .Values.archerysec.tag }}"
+        imagePullPolicy: "{{ .Values.archerysec.imagePullPolicy }}"
+        name: {{ template "archerysec.name" . }}
+        ports:
+        - containerPort: {{ .Values.archerysec.service.ports.web }}
+        resources:
+          {{- toYaml .Values.archerysec.resources | nindent 10 }}
+      restartPolicy: {{ .Values.archerysec.restartPolicy }}
+      # serviceAccountName: {}
+      # volumes: {}
 status: {}
 {{- end -}}
