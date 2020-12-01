@@ -2,9 +2,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "openvas.fullname" . }}
+  name: {{ include "openvas.fullname" . }}-openvas
   labels:
-    app.kubernetes.io/name: {{ include "openvas.name" . }}
+    app.kubernetes.io/name: {{ include "openvas.name" . }}-openvas
     helm.sh/chart: {{ include "openvas.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -13,7 +13,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "openvas.name" $ | indent 6 }}
+      app.kubernetes.io/name: {{ include "openvas.name" $ | indent 6 }}-openvas
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
@@ -22,7 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ include "openvas.name" $ | indent 8 }}
+        app.kubernetes.io/name: {{ include "openvas.name" $ | indent 8 }}-openvas
         app,kubernetes.io/instance: {{ .Release.Name }}
         {{- with .Values.openvas.podLabels }}
           {{- toYaml . | nindent 10 }}
@@ -35,7 +35,7 @@ spec:
       containers:
       - image: avhost/docker-openvas
         imagePullPolicy: {{ .Values.openvas.imagePullPolicy }}
-        name: {{ template "openvas.name" . }}
+        name: {{ template "openvas.name" . }}-openvas
         ports:
         - containerPort: {{ .Values.openvas.ports.https_web }}
         - containerPort: {{ .Values.openvas.ports.api_1 }}

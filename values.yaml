@@ -68,7 +68,7 @@ postgresdb:
   replication:
     enabled: false
   
-    image: postgress
+    image: postgres
     # version bumb from 10.5-alpine
     tag: "10.15-alpine"
     imagePullPolicy: IfNotPresent
@@ -332,7 +332,8 @@ identifier:
 ### create cluster role binding
 ## **TODO NOT LINKED YET TO THE TEMPLATE**
 rbac:
-  create: true
+  create: false
 
 serviceAccount:
-  enabled: false
+  create: false
+  name: archerysec-helm-chart

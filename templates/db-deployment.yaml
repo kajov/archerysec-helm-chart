@@ -48,7 +48,9 @@ spec:
             - mountPath: /var/lib/postgresql/data
               name: db-claim0
       restartPolicy: Always
-      # serviceAccountName: ""
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: "archerysec-helm-chart"
+      {{- end }}
       volumes:
         - name: db-claim0
           persistentVolumeClaim:

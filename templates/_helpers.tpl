@@ -170,3 +170,13 @@ Create the name for the tls secret.
     {{- .Values.postgresdb.service.port -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "archerysec.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "archerysec.fullname" .)}}
+{{- end -}}
+{{- end -}}

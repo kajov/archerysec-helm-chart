@@ -42,7 +42,7 @@ spec:
         - name: ARCHERY_WORKER
           value: "TRUE"
         - name: DB_HOST
-          value: db
+          value: archerysec-helm-chart-db.threat-management.svc.cluster.local
         - name: DB_NAME
           value: archerysec
         - name: DB_PASSWORD
@@ -67,7 +67,9 @@ spec:
         resources:
           {{- toYaml .Values.archerysec.resources | nindent 10 }}
       restartPolicy: {{ .Values.archerysec.restartPolicy }}
-      # serviceAccountName: {}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: "archerysec-helm-chart"
+      {{- end }}
       # volumes: {}
 status: {}
 {{- end -}}
