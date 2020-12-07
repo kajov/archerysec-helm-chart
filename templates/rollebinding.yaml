@@ -1,0 +1,20 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: {{ template "archerysec.fullname" . }}-Role-Binding
+  labels:
+    app: {{ template "archerysec.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+roleRef:
+  kind: Role
+  name: {{ include "archerysec.fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: {{ include "archerysec.name" . }}-sa
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+

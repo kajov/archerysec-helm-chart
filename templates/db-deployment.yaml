@@ -39,7 +39,7 @@ spec:
               value: archerysec
             - name: POSTGRES_USER
               value: archerysec
-          image: "{{ .Values.postgresdb.image }}:{{ .Values.postgresdb.tag}}"
+          image: "postgres:10.15-alpine"
           imagePullPolicy: "{{ .Values.postgresdb.imagePullPolicy}}"
           name: {{ template  "postgresdb.name" . }}-db
           resources:
@@ -49,7 +49,7 @@ spec:
               name: db-claim0
       restartPolicy: Always
       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: "archerysec-helm-chart"
+      serviceAccountName: "{{ include "archerysec.fullname" . }}-sa"
       {{- end }}
       volumes:
         - name: db-claim0

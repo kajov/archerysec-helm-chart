@@ -24,7 +24,7 @@ vault:
 arachni:
   # Enable or disable arachni deployment
   deployment:
-    enabled: false
+    enabled: true
 
   # Arachni Service ports
   service:
@@ -90,7 +90,7 @@ postgresdb:
       DJANGO_SETTINGS_MODULE: archerysecurity.settings.development
 
 
-      #Vault integration for secret-key-injection
+      #Vault integration needed for secret-key-injection
       DJANGO_SECRET_KEY: "uYvGz4IbkM9CZEcM9lMmx40Sj0ycXiVE"
       DJANGO_DEBUG: 1
       EMAIL_HOST: mailhog
@@ -122,7 +122,7 @@ postgresdb:
 # OpenVas deployment
 openvas:
   deployment:
-    enabled: false
+    enabled: true
 
   images: avhost/docker-openvas
   tag: latest
@@ -152,11 +152,11 @@ openvas:
   podAnnotations: {}
   
   securityContext:
-    runAsRoot: false
-    privileged: true
     runAsUser: 1000
     fsGroup: 1000
 
+  podLabels: {}
+  podAnnotations: {}
 
 # Mailhog Deployment
 mailhog:

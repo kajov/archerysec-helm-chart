@@ -4,8 +4,11 @@ kind: Service
 metadata:
   annotations:
   labels:
-    io.kompose.service: arachni
-  name: arachni
+    app.kubernetes.io/name: {{ include "arachni.name" . }}-arachni
+    helm.sh/chart: {{ include "arachni.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ include "arachni.fullname" . }}-arachni
 spec:
   ports:
     - name: "9292"
@@ -14,7 +17,9 @@ spec:
     - name: "7331"
       port: 7331
       targetPort: 7331
-  selector: {}
+  selector:
+    app.kubernetes.io/name: {{ include "arachni.name" . }}-arachni
+    helm.sh/chart: {{ include "arachni.chart" . }}
 status:
   loadBalancer: {}
 {{- end -}}

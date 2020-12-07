@@ -39,7 +39,7 @@ spec:
         resources:
           {{- toYaml .Values.zaproxy.resources | nindent 8 -}}
       restartPolicy: {{ .Values.zaproxy.restartPolicy }}
-      serviceAccountName: {}
+      serviceAccountName: "{{ include "archerysec.fullname" . }}-sa"
       volumes: {}
 status: {}
 {{- end -}}

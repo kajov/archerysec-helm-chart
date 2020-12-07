@@ -7,7 +7,7 @@ icon: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOwuiZSGbQx2gRuffBnA
 owner: ArcherySec
 maintainers:
   - name: Karolis Jovaisas
-    email: kjovaisas@gmail.com
+    email: kjovaisas@hms-dev.com
 sources:
   - https://github.com/archerysec/archerysec
 keywords:

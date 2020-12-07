@@ -2,49 +2,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "arachni.fullname" . }}
+  name: {{ include "arachni.fullname" . }}-arachni
   labels:
-    app.kubernetes.io/name: {{ include "arachni.name" . }}
+    app.kubernetes.io/name: {{ include "arachni.name" . }}-arachni
     helm.sh/chart: {{ include "arachni.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   namespace: {{ .Release.Namespace }}
 spec:
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "arachni.name" . }}
+      app.kubernetes.io/name: {{ include "arachni.name" $ | indent 6 }}-arachni
       app.kubernetes.io/instance: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
-      {{- with .Values.arachni.podAnnotations }}
-      annotations:
-        {{ toYaml . | indent 8 }}
+      {{- with .Values.openvas.podAnnotations }}
+      annotation:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ include "arachni.name" . }}
+        app.kubernetes.io/name: {{ include "arachni.name" . }}-arachni
+        helm.sh/chart: {{ include "arachni.chart" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{ with .Values.arachni.podlabels }}
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
-      {{- with .Values.arachni.securityContext }}
-      securityContext:
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
       containers:
-        command: ["/bin/sh"]
-        args: ["-c", "bin/arachni_rest_server --address 0.0.0.0"]
-        image: "{{ .Values.arachni.image }}:{{ .Values.arachni.tag }}"
+      - image: "{{ .Values.arachni.image }}:{{ .Values.arachni.tag }}"
         imagePullPolicy: "{{ .Values.arachni.pullPolicy}}"
-        name: {{ template "arachni.name" . }}
+        name: {{ template "arachni.name" . }}-arachni
         ports: 
           - containerPort: {{ .Values.arachni.service.httpPort }}
           - containerPort: {{ .Values.arachni.service.apiPort }}
+        command: ["/bin/bash"]
+        args: ["-c", "bin/arachni_rest_server --address 0.0.0.0"]
         resources:
           {{- toYaml .Values.arachni.resources | nindent 10 }}
       restartPolicy: {{ .Values.arachni.restartPolicy }}
-      serviceAccountName: {}
-      volumes: {}
-status: {}
+      serviceAccountName: "{{ include "archerysec.fullname" . }}-sa"
+      # volumes: {}
+# status: {}
 {{- end -}}

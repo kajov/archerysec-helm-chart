@@ -22,16 +22,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ include "openvas.name" $ | indent 8 }}-openvas
-        app,kubernetes.io/instance: {{ .Release.Name }}
-        {{- with .Values.openvas.podLabels }}
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
+        app.kubernetes.io/name: {{ include "openvas.name" . }}-openvas
+        helm.sh/chart: {{ include "openvas.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
-      {{- with .Values.openvas.securityContext }}
-        securityContext:
-          {{- toYaml . | nindent 10 }}
-      {{- end }}
       containers:
       - image: avhost/docker-openvas
         imagePullPolicy: {{ .Values.openvas.imagePullPolicy }}
@@ -43,7 +38,7 @@ spec:
         resources:
           {{- toYaml .Values.openvas.resources | nindent 10 }}
       restartPolicy: {{ .Values.openvas.restartPolicy }}
-      serviceAccountName: {}
-      volumes: {}
-status: {}
+      serviceAccountName: "{{ include "archerysec.fullname" . }}-sa"
+      # volumes: {}
+# status: {}
 {{- end -}}

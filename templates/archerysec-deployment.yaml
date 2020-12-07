@@ -67,7 +67,7 @@ spec:
           {{- toYaml .Values.archerysec.resources | nindent 10 }}
       restartPolicy: {{ .Values.archerysec.restartPolicy }}
       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: "archerysec-helm-chart"
+      serviceAccountName: "{{ include "archerysec.fullname" . }}-sa"
       {{- end }}
       # volumes: {}
 status: {}
